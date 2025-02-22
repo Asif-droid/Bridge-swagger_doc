@@ -1,0 +1,1 @@
+pip install flask, flasgger, werkzeug, flask_swagger_ui
