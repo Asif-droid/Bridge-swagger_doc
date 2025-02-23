@@ -1,4 +1,4 @@
-pip install flask, flasgger, werkzeug, flask_swagger_ui
+pip install flask, flasgger, werkzeug, flask_swagger_ui, Pillow
 
 - run python demo.py
 

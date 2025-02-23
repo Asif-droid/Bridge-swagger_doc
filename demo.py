@@ -5,6 +5,10 @@ import threading
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from flask_swagger_ui import get_swaggerui_blueprint
+import base64
+from io import BytesIO
+from PIL import Image
+import json
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads"
@@ -24,20 +28,30 @@ app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 API_KEY="123"
 
-def process_document(request_id):
+def process_document(request_id,file_type):
     """Simulate document processing with a delay."""
-    time.sleep(100)  # Simulating processing time
+    with open("example-data.json", "r", encoding="utf-8") as file:
+        ex_data_all = json.load(file)
+    
+    ex_data=ex_data_all[file_type]
+    print(ex_data)
+    time.sleep(1)  # Simulating processing time
     request_store[request_id]["status"] = "completed"
-    request_store[request_id]["data"] = {
-        "key_1": "value_1",
-        "key_2": "value_2",
-        "key_3": "value_3"
-    }
+    request_store[request_id][file_type] = ex_data
+    # {
+    #     "key_1": "value_1",
+    #     "key_2": "value_2",
+    #     "key_3": "value_3"
+    # }
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 def allowed_file(filename):
     """Check if file has an allowed extension."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def allowed_file_extension(extension):
+    """Check if the file extension is allowed."""
+    return extension.lower() in ALLOWED_EXTENSIONS
 
 @app.route("/doc-upload", methods=["POST"])
 def upload_document():
@@ -47,31 +61,57 @@ def upload_document():
     if not auth_header or auth_header != API_KEY:
         return jsonify({"message": "API key is required"}), 401
 
-    if "file" not in request.files or "file_type" not in request.form:
+    data = request.get_json()
+    # print(data)
+    if not data or "file" not in data or "file_type" not in data:
         return jsonify({"message": "Missing required parameters"}), 400
 
-    file = request.files["file"]
-    file_type = request.form["file_type"]
+    base64_string = data["file"]
+    # print(base64_string)
+    file_type = data["file_type"]
 
     if file_type not in VALID_FILE_TYPES:
         return jsonify({"message": "Document type not supported"}), 406
 
-    if file.filename == "":
-        return jsonify({"message": "No file selected"}), 400
+    # if file.filename == "":
+    #     return jsonify({"message": "No file selected"}), 400
 
-    if not allowed_file(file.filename):
-        return jsonify({"message": "Only supported media is base64 encoded images (PNG, JPG, JPEG)"}), 415
+    # if not allowed_file(file.filename):
+    #     return jsonify({"message": "Only supported media is base64 encoded images (PNG, JPG, JPEG)"}), 415
 
-    filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    file.save(file_path)
+    # filename = secure_filename(file.filename)
+    # file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    # file.save(file_path)
 
+    try:
+        # Decode the base64 string
+        header, encoded = base64_string.split(",", 1) if "," in base64_string else ("", base64_string)
+        decoded_image = base64.b64decode(encoded)
+
+        # Determine file extension
+        image = Image.open(BytesIO(decoded_image))
+        ext = image.format.lower()
+
+        if not allowed_file_extension(ext):
+            return jsonify({"message": "Only PNG, JPG, and JPEG are allowed"}), 415
+
+        # Generate a secure filename
+        filename = f"{uuid.uuid4()}.{ext}"
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+        # Save the image
+        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+        image.save(file_path)
+
+    except Exception as e:
+        return jsonify({"message": f"Invalid base64 image: {str(e)}"}), 400
+    
     # Generate a unique request_id
     request_id = str(uuid.uuid4())
-    request_store[request_id] = {"status": "processing", "data": None}
+    request_store[request_id] = {"status": "processing"}
 
     # Start processing in a separate thread
-    threading.Thread(target=process_document, args=(request_id,)).start()
+    threading.Thread(target=process_document, args=(request_id,file_type)).start()
 
     return jsonify({
         "request_id": request_id,
@@ -99,8 +139,7 @@ def get_status(request_id):
 
     return jsonify({
         "request_id": request_id,
-        "status": "completed",
-        "data": status_info["data"]
+        "data": status_info
     }), 200
 
 @app.route("/swagger.json")
@@ -127,21 +166,62 @@ def swagger_json():
                             "description": "Bearer token for authentication"
                         },
                         {
-                            "name": "file",
-                            "in": "formData",
+                            "in": "body",
+                            "name": "body",
                             "required": True,
-                            "type": "file",
-                            "description": "Document file to be uploaded"
-                        },
-                        {
-                            "name": "file_type",
-                            "in": "formData",
-                            "required": True,
-                            "type": "string",
-                            "enum": list(VALID_FILE_TYPES),
-                            "description": "Type of document"
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "description": "Base64 encoded image"
+                                        },
+                                    "file_type" : {
+                                        "type": "string",
+                                        "enum": list(VALID_FILE_TYPES)
+                                    }
+                                }
+                            }
                         }
+                        # {
+                        #     "name": "file",
+                        #     "in": "formData",
+                        #     "required": True,
+                        #     "type": "file",
+                        #     "description": "Document file to be uploaded"
+                        # },
+                        # {
+                        #     "name": "file_type",
+                        #     "in": "formData",
+                        #     "required": True,
+                        #     "type": "string",
+                        #     "enum": list(VALID_FILE_TYPES),
+                        #     "description": "Type of document"
+                        # }
                     ],
+                    # "requestBody": {
+                    #     "required": True,
+                    #     "content": {
+                    #         "application/json": {
+                    #             "schema": {
+                    #                 "type": "object",
+                    #                 "properties": {
+                    #                     "file": {
+                    #                         "type": "string",
+                    #                         "description": "Base64-encoded image string (optionally prefixed with 'data:image/png;base64,')"
+                    #                     },
+                    #                     "file_type": {
+                    #                         "type": "string",
+                    #                         "enum": list(VALID_FILE_TYPES),
+                    #                         "description": "Type of document (Only 'image' is allowed)"
+                    #                     }
+                    #                 },
+                    #                 "required": ["file", "file_type"]
+                    #             }
+                    #         }
+                    #     }
+                    # },
+                    
                     "responses": {
                         "200": {
                             "description": "Success",

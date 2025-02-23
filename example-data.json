@@ -1,0 +1,45 @@
+{
+    "JOB_ID": {
+      "Name": "Md. Shahin Alam",
+      "Company Name": "Innovative Solutions Ltd.",
+      "Employee Id no": "EMP123456",
+      "Company Email Id": "shahin.alam@innovativesolutions.com.bd",
+      "Company Address": "Block A, 4th Floor, House 8, Dhanmondi, Dhaka-1205, Bangladesh"
+    },
+    "PAY_SLIP": {
+      "Name of A/C Holder": "Fatema Begum",
+      "Company Name": "GreenTech Innovations Ltd.",
+      "Company Address": "Plot 12, Sector 7, Uttara, Dhaka-1230, Bangladesh",
+      "Email": "fatema.begum@greentech.com.bd",
+      "Date of Joining": "2023-08-15",
+      "Designation": "Project Manager",
+      "Department": "Operations",
+      "Total Earnings": 95000
+    },
+    "SALARY_CERTIFICATE": {
+      "Name of A/C Holder": "Md. Rahim Uddin",
+      "Company Name": "Bangla Tech Solutions Ltd.",
+      "Company Address": "House 45, Road 10, Banani, Dhaka-1213, Bangladesh",
+      "Contact No": "+880 1555-123456",
+      "Email": "rahim.uddin@banglatech.com.bd",
+      "Designation": "Senior Software Developer",
+      "Department": "IT & Development",
+      "Basic salary amount": 60000,
+      "Total salary amount": 75000
+    },
+    "TRADE_LICENSE": {
+      "License No": "LN123456789",
+      "NID No": "1234567890123456",
+      "Owner Name": "Kazi Mohammad Karim",
+      "Father's Name": "Kazi Abdul Majid",
+      "Mother's Name": "Kazi Rokeya Begum",
+      "Spouse Name": "Mst. Nafisa Karim",
+      "Permanent Address": "Village Chotto, Upazila Baghair, District Narail, Bangladesh",
+      "Current Address": "House 45, Road 10, Gulshan-2, Dhaka-1212, Bangladesh",
+      "Business Name": "Karim & Sons Trading",
+      "Business Address": "Shop 25, Market Road, Mohammadpur, Dhaka-1207, Bangladesh",
+      "Business Type": "Wholesale Distribution",
+      "Expiry Date": "2026-05-30"
+    }
+  }
+  
