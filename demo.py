@@ -61,50 +61,70 @@ def upload_document():
     if not auth_header or auth_header != API_KEY:
         return jsonify({"message": "API key is required"}), 401
 
-    data = request.get_json()
-    # print(data)
-    if not data or "file" not in data or "file_type" not in data:
+    
+    if "file" not in request.files or "file_type" not in request.form:
         return jsonify({"message": "Missing required parameters"}), 400
 
-    base64_string = data["file"]
-    # print(base64_string)
-    file_type = data["file_type"]
+    file = request.files["file"]
+    file_type = request.form["file_type"]
+    
+    # data = request.get_json()
+    # # print(data)
+    # if not data or "file" not in data or "file_type" not in data:
+    #     return jsonify({"message": "Missing required parameters"}), 400
+
+    # base64_string = data["file"]
+    # # print(base64_string)
+    # file_type = data["file_type"]
 
     if file_type not in VALID_FILE_TYPES:
         return jsonify({"message": "Document type not supported"}), 406
 
-    # if file.filename == "":
-    #     return jsonify({"message": "No file selected"}), 400
+    if file.filename == "":
+        return jsonify({"message": "No file selected"}), 400
 
-    # if not allowed_file(file.filename):
-    #     return jsonify({"message": "Only supported media is base64 encoded images (PNG, JPG, JPEG)"}), 415
+    if not allowed_file(file.filename):
+        return jsonify({"message": "Only supported media is base64 encoded images (PNG, JPG, JPEG)"}), 415
 
-    # filename = secure_filename(file.filename)
-    # file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    # file.save(file_path)
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(file_path)
 
     try:
-        # Decode the base64 string
-        header, encoded = base64_string.split(",", 1) if "," in base64_string else ("", base64_string)
-        decoded_image = base64.b64decode(encoded)
-
-        # Determine file extension
-        image = Image.open(BytesIO(decoded_image))
-        ext = image.format.lower()
-
-        if not allowed_file_extension(ext):
-            return jsonify({"message": "Only PNG, JPG, and JPEG are allowed"}), 415
-
-        # Generate a secure filename
-        filename = f"{uuid.uuid4()}.{ext}"
-        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-
-        # Save the image
-        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-        image.save(file_path)
-
+        image = Image.open(file)
+        width, height = image.size
+        print(f"Image resolution: {width}x{height}")
+        # You can add additional checks for resolution if needed
+        # For example, if you want to ensure the image is at least 800x600
+        if (width > 1700 or width < 1500) or (height <2000 or height > 2600 ):
+            return jsonify({"message": "Image resolution not within range. Accepted range (1500-1700)x(2000-2600)."}), 400
     except Exception as e:
-        return jsonify({"message": f"Invalid base64 image: {str(e)}"}), 400
+        return jsonify({"message": f"Invalid image file: {str(e)}"}), 400
+
+    
+    # for base 64 encoded
+    # try:
+    #     # Decode the base64 string
+    #     header, encoded = base64_string.split(",", 1) if "," in base64_string else ("", base64_string)
+    #     decoded_image = base64.b64decode(encoded)
+
+    #     # Determine file extension
+    #     image = Image.open(BytesIO(decoded_image))
+    #     ext = image.format.lower()
+
+    #     if not allowed_file_extension(ext):
+    #         return jsonify({"message": "Only PNG, JPG, and JPEG are allowed"}), 415
+
+    #     # Generate a secure filename
+    #     filename = f"{uuid.uuid4()}.{ext}"
+    #     file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+    #     # Save the image
+    #     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    #     image.save(file_path)
+
+    # except Exception as e:
+    #     return jsonify({"message": f"Invalid base64 image: {str(e)}"}), 400
     
     # Generate a unique request_id
     request_id = str(uuid.uuid4())
@@ -165,39 +185,39 @@ def swagger_json():
                             "type": "string",
                             "description": "Bearer token for authentication"
                         },
-                        {
-                            "in": "body",
-                            "name": "body",
-                            "required": True,
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "file": {
-                                        "type": "string",
-                                        "description": "Base64 encoded image"
-                                        },
-                                    "file_type" : {
-                                        "type": "string",
-                                        "enum": list(VALID_FILE_TYPES)
-                                    }
-                                }
-                            }
-                        }
                         # {
-                        #     "name": "file",
-                        #     "in": "formData",
+                        #     "in": "body",
+                        #     "name": "body",
                         #     "required": True,
-                        #     "type": "file",
-                        #     "description": "Document file to be uploaded"
-                        # },
-                        # {
-                        #     "name": "file_type",
-                        #     "in": "formData",
-                        #     "required": True,
-                        #     "type": "string",
-                        #     "enum": list(VALID_FILE_TYPES),
-                        #     "description": "Type of document"
+                        #     "schema": {
+                        #         "type": "object",
+                        #         "properties": {
+                        #             "file": {
+                        #                 "type": "string",
+                        #                 "description": "Base64 encoded image"
+                        #                 },
+                        #             "file_type" : {
+                        #                 "type": "string",
+                        #                 "enum": list(VALID_FILE_TYPES)
+                        #             }
+                        #         }
+                        #     }
                         # }
+                        {
+                            "name": "file",
+                            "in": "formData",
+                            "required": True,
+                            "type": "file",
+                            "description": "Document file to be uploaded"
+                        },
+                        {
+                            "name": "file_type",
+                            "in": "formData",
+                            "required": True,
+                            "type": "string",
+                            "enum": list(VALID_FILE_TYPES),
+                            "description": "Type of document"
+                        }
                     ],
                     # "requestBody": {
                     #     "required": True,
@@ -255,6 +275,16 @@ def swagger_json():
                         },
                         "429": {
                             "description": "Too Many Requests",
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "request_id": {"type": "string"},
+                                    "message": {"type": "string"}
+                                }
+                            }
+                        },
+                        "400": {
+                            "description": "Bad Request",
                             "schema": {
                                 "type": "object",
                                 "properties": {

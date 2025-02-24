@@ -1,0 +1,102 @@
+swagger: "2.0"
+info:
+  title: "Document Processing API"
+  description: "API to upload documents and check their processing status."
+  version: "1.0.0"
+
+host: "localhost:5000"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /doc-upload:
+    post:
+      summary: "Upload a document"
+      description: "Uploads a document and returns a request ID."
+      consumes:
+        - "multipart/form-data"
+      parameters:
+        - name: "Authorization"
+          in: "header"
+          required: true
+          type: "string"
+          description: "Bearer token for authentication."
+        - name: "file"
+          in: "formData"
+          required: true
+          type: "file"
+          description: "Document file to be uploaded."
+        - name: "file_type"
+          in: "formData"
+          required: true
+          type: "string"
+          enum: ["SALARY_CERTIFICATE", "PAY_SLIP", "JOB_ID", "TRADE_LICENSE", "OWNERSHIP_DOCUMENTS"]
+          description: "Type of document."
+      responses:
+        200:
+          description: "Success. Document is being processed."
+          schema:
+            type: "object"
+            properties:
+              request_id:
+                type: "string"
+              message:
+                type: "string"
+        400:
+          description: "Bad Request. Missing required parameters."
+        401:
+          description: "Unauthorized. API key is required."
+        406:
+          description: "Not Acceptable. Document type not supported."
+        415:
+          description: "Unsupported Media Type. Only PNG, JPG, and JPEG are allowed."
+
+  /doc-status/{request_id}:
+    get:
+      summary: "Get processing status"
+      description: "Check the processing status of an uploaded document."
+      parameters:
+        - name: "Authorization"
+          in: "header"
+          required: true
+          type: "string"
+          description: "Bearer token for authentication."
+        - name: "request_id"
+          in: "path"
+          required: true
+          type: "string"
+          description: "Unique request ID."
+      responses:
+        200:
+          description: "Processing complete. Returns the document data."
+          schema:
+            type: "object"
+            properties:
+              request_id:
+                type: "string"
+              data:
+                type: "object"
+        202:
+          description: "Processing. Data not ready yet."
+          schema:
+            type: "object"
+            properties:
+              request_id:
+                type: "string"
+              status:
+                type: "string"
+        401:
+          description: "Unauthorized. API key is required."
+        404:
+          description: "Request ID not found."
+        503:
+          description: "Service unavailable."
+
+definitions:
+  ErrorResponse:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+
