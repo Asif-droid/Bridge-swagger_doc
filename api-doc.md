@@ -20,7 +20,7 @@ All requests require an API key in the `Authorization` header.
 - `Authorization`: API Key (required)
 
 **Form Data:**
-- `file`: The document file (PNG, JPG, JPEG)
+- `file`: The document file (PNG, JPG, JPEG). Resolustion of the image must be in this range (1500-1700)x(2000-2600).
 - `file_type`: The type of document (SALARY_CERTIFICATE, PAY_SLIP, JOB_ID, etc.)
 
 **Responses:**

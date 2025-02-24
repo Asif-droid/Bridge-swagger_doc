@@ -4,3 +4,4 @@ pip install flask, flasgger, werkzeug, flask_swagger_ui, Pillow
 
 - go to [swagger-Ui](http://127.0.0.1:5000/api/docs/) to view api
 
+- [api documentation] (./api-doc.md)
