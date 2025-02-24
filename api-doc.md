@@ -21,11 +21,12 @@ All requests require an API key in the `Authorization` header.
 
 **Form Data:**
 - `file`: The document file (PNG, JPG, JPEG). Resolustion of the image must be in this range (1500-1700)x(2000-2600).
-- `file_type`: The type of document (SALARY_CERTIFICATE, PAY_SLIP, JOB_ID, TRADE_LICENSE, OWNERSHIP_DOCUMENTS)
+- `file_type`: The type of document (SALARY_CERTIFICATE, PAY_SLIP, JOB_ID_CARD, TRADE_LICENSE, OWNERSHIP_DOCUMENTS)
 
 **Responses:**
 - `200 OK`: Document uploaded successfully, processing started.
-```json {
+```json 
+{
     "request_id": "550e8400-e29b-41d4-a716-446655440000",
     "message": "Document is being processed. Please check status after a while"
 }
@@ -47,8 +48,10 @@ All requests require an API key in the `Authorization` header.
 
 **Responses:**
 - `200 OK`: Processing completed, document data returned.
- Example Per Document Type:
- . JOB_ID
+
+ Example Per Document Type:  
+
+ JOB_ID_CARD
  ``` json
     {
         "request_id": "550e8400-e29b-41d4-a716-446655440000",

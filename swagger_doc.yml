@@ -31,7 +31,7 @@ paths:
           in: "formData"
           required: true
           type: "string"
-          enum: ["SALARY_CERTIFICATE", "PAY_SLIP", "JOB_ID", "TRADE_LICENSE", "OWNERSHIP_DOCUMENTS"]
+          enum: ["SALARY_CERTIFICATE", "PAY_SLIP", "JOB_ID_CARD", "TRADE_LICENSE", "OWNERSHIP_DOCUMENTS"]
           description: "Type of document."
       responses:
         200:
