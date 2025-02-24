@@ -50,5 +50,5 @@ All requests require an API key in the `Authorization` header.
 ---
 ## Swagger Documentation
 The API is documented using Swagger.
-- Swagger UI: [http://localhost:5000/api/docs](.\swagger_doc.yml)
+- Swagger UI: [http://localhost:5000/api/docs](./swagger_doc.yml)
 <!-- - Swagger JSON: [http://localhost:5000/swagger.json](http://localhost:5000/swagger.json) -->
