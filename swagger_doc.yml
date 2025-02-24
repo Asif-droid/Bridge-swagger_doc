@@ -93,10 +93,5 @@ paths:
         503:
           description: "Service unavailable."
 
-definitions:
-  ErrorResponse:
-    type: "object"
-    properties:
-      message:
-        type: "string"
+
 
