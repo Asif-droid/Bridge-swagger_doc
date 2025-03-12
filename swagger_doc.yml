@@ -93,5 +93,142 @@ paths:
         503:
           description: "Service unavailable."
 
+  /process:
+    post:
+      summary: Process an image with ML model
+      description: Submit an image along with text prompts for ML processing
+      operationId: processImage
+      tags:
+        - ML Processing
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: The image file to process
+                prompt:
+                  type: string
+                  description: Text prompt to guide the ML processing
+                  example: "Detect objects in this image"
+                settings:
+                  type: object
+                  description: Optional processing settings
+                  properties:
+                    confidence_threshold:
+                      type: number
+                      format: float
+                      minimum: 0
+                      maximum: 1
+                      default: 0.5
+                      description: Minimum confidence threshold for detections
+                    max_results:
+                      type: integer
+                      minimum: 1
+                      maximum: 100
+                      default: 10
+                      description: Maximum number of results to return
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request_id:
+                    type: string
+                    description: Unique identifier for this request
+                    example: "req_12345abcde"
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        label:
+                          type: string
+                          description: Detected object or feature label
+                          example: "person"
+                        confidence:
+                          type: number
+                          format: float
+                          description: Confidence score (0-1)
+                          example: 0.97
+                        bounding_box:
+                          type: object
+                          description: Coordinates of detection bounding box (if applicable)
+                          properties:
+                            x:
+                              type: number
+                              description: X coordinate (normalized 0-1)
+                            y:
+                              type: number
+                              description: Y coordinate (normalized 0-1)
+                            width:
+                              type: number
+                              description: Width (normalized 0-1)
+                            height:
+                              type: number
+                              description: Height (normalized 0-1)
+                  processing_time:
+                    type: number
+                    format: float
+                    description: Processing time in milliseconds
+                    example: 342.5
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Invalid image format"
+                  request_id:
+                    type: string
+                    description: Unique identifier for this request
+                    example: "req_12345abcde"
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Rate limit exceeded"
+                  retry_after:
+                    type: integer
+                    description: Time in seconds to wait before retrying
+                    example: 60
+                  request_id:
+                    type: string
+                    description: Unique identifier for this request
+                    example: "req_12345abcde"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "ML service unavailable"
+                  request_id:
+                    type: string
+                    description: Unique identifier for this request
+                    example: "req_12345abcde"
 
 
